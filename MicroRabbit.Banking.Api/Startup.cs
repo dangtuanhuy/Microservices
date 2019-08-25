@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using MicroRabbit.Banking.Data.Context;
 using MicroRabbit.Infra.IoC;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace MicroRabbit.Banking.Api
 {
@@ -32,6 +34,13 @@ namespace MicroRabbit.Banking.Api
             services.AddDbContext<BankingDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("BankingDbConnection")));
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Banking Microservice", Version = "v1" });
+            });
+
+            services.AddMediatR(typeof(Startup));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             RegisterServices(services);
         }
@@ -54,6 +63,11 @@ namespace MicroRabbit.Banking.Api
                 app.UseHsts();
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Banking Microservice V1");
+            });
             app.UseHttpsRedirection();
             app.UseMvc();
         }
